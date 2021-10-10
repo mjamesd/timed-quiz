@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,6 +8,7 @@
     <title>So You Think You Can Code?</title>
     <link rel="stylesheet" href="assets/css/style.css" />
 </head>
+
 <body>
     <div class="wrapper">
         <header class="card-header" id="question">
@@ -14,16 +16,20 @@
             <p>Play America's <em>favorite</em> new gameshow!</p>
         </header>
         <aside aria-label="Game Timer">
-            <section id="timer"><h3 id="theTimer">60</h3></section>
+            <section id="timer">
+                <h3 id="theTimer">60</h3>
+            </section>
         </aside>
         <main class="card">
             <section class="card-body" id="answersContainer">
                 <ul id="answersList">
-                    <p>Try to answer the following code-related questions within the time limit. Keep in mind that incorrect answers will penalize your scoretime by ten seconds!</p>
+                    <p>Try to answer the following code-related questions within the time limit. Keep in mind that
+                        incorrect answers will penalize your scoretime by ten seconds!</p>
                 </ul>
             </section>
             <section class="card-footer" id="btnContainer">
                 <button id="submitAnswer" class="btn">Start Game!</button>
+                <button id="viewHighScores" class="btn">View High Scores</button>
             </section>
         </main>
         <footer>
@@ -32,4 +38,5 @@
     </div>
     <script src="assets/js/script.js"></script>
 </body>
+
 </html>

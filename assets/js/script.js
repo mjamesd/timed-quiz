@@ -11,14 +11,15 @@ var timerText = document.getElementById("theTimer");
 var questionText = document.getElementById("question");
 var answersText = document.getElementById("answersList");
 var answersContainer = document.getElementById("answersContainer");
+var viewHighScoresBtn = document.getElementById("viewHighScores");
 
 
 // Global Variables
 var wins = 0;
 var losses = 0;
 var userInitials;
-var highScores;
-var thisHighScore;
+var highScores = [];
+var thisHighScore = {};
 const defaultSecondsLeft = 60;
 var secondsLeft = defaultSecondsLeft;
 var timerInterval;
@@ -50,18 +51,15 @@ var questions = [
 
 
 // Functions
-function init(isNotFirstRun=false) {
+function init(isNotFirstRun = false) {
     wins = 0;
     losses = 0;
-    setTimer(isNotFirstRun);
-    startGame(0);
+    setTimer();
+    startGame();
 }
 
-function setTimer(restartGame = false) {
-    if (restartGame === true) {
-        secondsLeft = defaultSecondsLeft;
-    }
-    timerInterval = setInterval(function() {
+function setTimer() {
+    timerInterval = setInterval(function () {
         secondsLeft--;
         timerText.textContent = secondsLeft;
 
@@ -69,25 +67,24 @@ function setTimer(restartGame = false) {
         if (secondsLeft < parseInt(Math.floor(defaultSecondsLeft / 1.25))) {
             timerText.setAttribute("style", "font-size: 200%; background-color: var(--card-bg-color);");
         }
-        
+
         if (secondsLeft < parseInt(Math.floor(defaultSecondsLeft / 2))) {
             timerText.setAttribute("style", "font-size: 275%; background-color: var(--light1);");
         }
-        
+
         if (secondsLeft < parseInt(Math.floor(defaultSecondsLeft / 4))) {
             timerText.setAttribute("style", "font-size: 350%; background-color: var(--light2); width: 90px; height: 90px;");
         }
-        
+
         if (secondsLeft <= 5) {
             timerText.setAttribute("style", "font-size: 400%; background-color: var(--error); width: 90px; height: 90px;");
         }
-        
+
         if (secondsLeft <= -1) {
             timerText.textContent = "0";
-            // clearInterval(timerInterval);
             gameOver("Time over!");
         }
-    }, 250);
+    }, 1000);
 }
 
 function startGame(index = 0) {
@@ -95,39 +92,28 @@ function startGame(index = 0) {
         gameOver("Let's see how you did!");
     } else {
         submitAnswer.remove();
-        // submitAnswer.textContent = "Submit Answer";
+        viewHighScoresBtn.remove();
         answersText.textContent = '';
-        //questionText.textContent =questions[0].question;
-        // console.log(questions.length);
-        //for (let i = 0; i < questions.length; i++) { // i < 1; i++) {
         // print the question
         let thisQuestionEl = document.createElement('h1');
         thisQuestionEl.textContent = questions[index].question;
-        // console.log(questionText.innerHTML);
-        // console.log(thisQuestionEl.innerHTML);
-        // questionText.textContent = thisQuestionEl;
-        // console.log(thisQuestionEl);
         questionText.textContent = '';
         questionText.appendChild(thisQuestionEl);
-        // console.log(questions[i].answers[0]);
         // append each answer to the answersList <ul>
         for (let j = 0; j < questions[index].answers.length; j++) {
             let thisAnswer = document.createElement("li");
             thisAnswer.dataset.id = j;
-            thisAnswer.textContent = (j+1) + ". " + questions[index].answers[j];
-            thisAnswer.addEventListener("click", function(event) {
+            thisAnswer.textContent = (j + 1) + ". " + questions[index].answers[j];
+            thisAnswer.addEventListener("click", function (event) {
                 // if correct
                 if (event.target.innerHTML.substring(3) == questions[index].win) {
-                    alert('ya got it');
                     wins++;
                 } else {
                     losses++;
-                    alert('wronggggg');
                     secondsLeft -= 10;
                 }
                 startGame(++index);
             });
-            //console.log(thisAnswer);
             answersText.appendChild(thisAnswer);
         }
     }
@@ -175,7 +161,7 @@ function gameOver(gameOverMsg = "") {
     answersContainer.appendChild(userInitialsEl);
     answersContainer.appendChild(submitUserInitialsBtn);
 
-    submitUserInitialsBtn.addEventListener("click", function(event) {
+    submitUserInitialsBtn.addEventListener("click", function (event) {
         event.preventDefault();
         // remove initials input and button so you can't submit it more than once.
         userInitialsLabelEl.remove();
@@ -187,36 +173,37 @@ function gameOver(gameOverMsg = "") {
         submitAnswer.setAttribute("id", "submitAnswer");
         submitAnswer.setAttribute("class", "btn");
         submitAnswer.innerHTML = "Play Again";
+        viewHighScores = document.createElement('button');
+        viewHighScores.setAttribute("id", "submitAnswer");
+        viewHighScores.setAttribute("class", "btn");
+        viewHighScores.innerHTML = "View High Scores";
         answersContainer.appendChild(userInitialsSubmittedEl);
         document.getElementById("btnContainer").appendChild(submitAnswer);
-        submitAnswer.addEventListener("click", function() {
-            init(false); // isFirstRun = false
+        document.getElementById("btnContainer").appendChild(viewHighScoresBtn);
+        submitAnswer.addEventListener("click", function () {
+            location.reload();
         });
 
         // make new high score obj and append to high scores array
+        userInitials = userInitialsEl.value.toUpperCase();
         thisHighScore = {
-            hSuser: userInitialsEl.value,
+            hSuser: userInitials,
             hSwins: wins,
             hSlosses: losses
         };
+        // thisHighScore = JSON.stringify(thisHighScore)
         // get current high scores
         var localHighScores = JSON.parse(localStorage.getItem("highScores"));
         if (localHighScores !== null) {
-            highScores = localHighScores;
-        } else {
-            highScores = [];
-            // highScores.push(JSON.stringify(thisHighScore));
+            for (let index = 0; index < localHighScores.length; index++) {
+                highScores.push(localHighScores[index]);
+            }
         }
-        console.log(highScores);
+        highScores.push(thisHighScore);
 
         // push high scores array to localstorage
-        localStorage.setItem("highScores", highScores);
+        localStorage.setItem("highScores", JSON.stringify(highScores));
     });
-}
-
-function renderHighScores() {
-    // clicked the 'view high scores' button
-    var highScores = JSON.parse(localStorage.getItem("highScores"));
 }
 
 
@@ -224,5 +211,8 @@ function renderHighScores() {
 
 // Code Initiation Point
 submitAnswer.addEventListener("click", init);
+viewHighScoresBtn.addEventListener("click", function () {
+    location.assign("./highScores.html");
+});
 
 // eof
