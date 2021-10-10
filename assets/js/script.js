@@ -17,6 +17,8 @@ var answersContainer = document.getElementById("answersContainer");
 var wins = 0;
 var losses = 0;
 var userInitials;
+var highScores;
+var thisHighScore;
 const defaultSecondsLeft = 60;
 var secondsLeft = defaultSecondsLeft;
 var timerInterval;
@@ -49,11 +51,16 @@ var questions = [
 
 // Functions
 function init(isNotFirstRun=false) {
+    wins = 0;
+    losses = 0;
     setTimer(isNotFirstRun);
-    startGame();
+    startGame(0);
 }
 
 function setTimer(restartGame = false) {
+    if (restartGame === true) {
+        secondsLeft = defaultSecondsLeft;
+    }
     timerInterval = setInterval(function() {
         secondsLeft--;
         timerText.textContent = secondsLeft;
@@ -80,14 +87,15 @@ function setTimer(restartGame = false) {
             // clearInterval(timerInterval);
             gameOver("Time over!");
         }
-    }, 500);
+    }, 250);
 }
 
 function startGame(index = 0) {
     if (index >= questions.length) {
         gameOver("Let's see how you did!");
     } else {
-        submitAnswer.textContent = "Submit Answer";
+        submitAnswer.remove();
+        // submitAnswer.textContent = "Submit Answer";
         answersText.textContent = '';
         //questionText.textContent =questions[0].question;
         // console.log(questions.length);
@@ -110,9 +118,11 @@ function startGame(index = 0) {
             thisAnswer.addEventListener("click", function(event) {
                 // if correct
                 if (event.target.innerHTML.substring(3) == questions[index].win) {
+                    alert('ya got it');
                     wins++;
                 } else {
                     losses++;
+                    alert('wronggggg');
                     secondsLeft -= 10;
                 }
                 startGame(++index);
@@ -122,12 +132,6 @@ function startGame(index = 0) {
         }
     }
     // var questionText, answersText
-}
-
-function answerIsCorrect(event) {
-    let thisAnswer = event.target.innerHTML.substring(3);
-    let thisQuestion = 
-    console.log(event.target.innerHTML.substring(3));
 }
 
 function gameOver(gameOverMsg = "") {
@@ -157,8 +161,66 @@ function gameOver(gameOverMsg = "") {
     msgParaEl.innerHTML = "# correct: " + wins + "<br /># wrong: " + losses;
     answersContainer.appendChild(msgH2El);
     answersContainer.appendChild(msgParaEl);
-    
+
+    // save user initials and score to localstorage
+    var userInitialsLabelEl = document.createElement('label');
+    userInitialsLabelEl.setAttribute("for", "userInitials");
+    userInitialsLabelEl.innerHTML = "Your Initials:";
+    var userInitialsEl = document.createElement('input');
+    userInitialsEl.setAttribute("id", "userInitials");
+    var submitUserInitialsBtn = document.createElement('button');
+    submitUserInitialsBtn.setAttribute("id", "submitUserInitials");
+    submitUserInitialsBtn.innerHTML = "Submit Your Score!";
+    answersContainer.appendChild(userInitialsLabelEl);
+    answersContainer.appendChild(userInitialsEl);
+    answersContainer.appendChild(submitUserInitialsBtn);
+
+    submitUserInitialsBtn.addEventListener("click", function(event) {
+        event.preventDefault();
+        // remove initials input and button so you can't submit it more than once.
+        userInitialsLabelEl.remove();
+        userInitialsEl.remove();
+        submitUserInitialsBtn.remove();
+        userInitialsSubmittedEl = document.createElement('p');
+        userInitialsSubmittedEl.innerHTML = "Thank you for submitting your score!";
+        submitAnswer = document.createElement('button');
+        submitAnswer.setAttribute("id", "submitAnswer");
+        submitAnswer.setAttribute("class", "btn");
+        submitAnswer.innerHTML = "Play Again";
+        answersContainer.appendChild(userInitialsSubmittedEl);
+        document.getElementById("btnContainer").appendChild(submitAnswer);
+        submitAnswer.addEventListener("click", function() {
+            init(false); // isFirstRun = false
+        });
+
+        // make new high score obj and append to high scores array
+        thisHighScore = {
+            hSuser: userInitialsEl.value,
+            hSwins: wins,
+            hSlosses: losses
+        };
+        // get current high scores
+        var localHighScores = JSON.parse(localStorage.getItem("highScores"));
+        if (localHighScores !== null) {
+            highScores = localHighScores;
+        } else {
+            highScores = [];
+            // highScores.push(JSON.stringify(thisHighScore));
+        }
+        console.log(highScores);
+
+        // push high scores array to localstorage
+        localStorage.setItem("highScores", highScores);
+    });
 }
+
+function renderHighScores() {
+    // clicked the 'view high scores' button
+    var highScores = JSON.parse(localStorage.getItem("highScores"));
+}
+
+
+
 
 // Code Initiation Point
 submitAnswer.addEventListener("click", init);
